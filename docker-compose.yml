@@ -1,0 +1,58 @@
+version: '2'
+
+services:
+
+  web:
+    build: config/
+    volumes:
+      - ./app:/var/www/html
+    ports:
+      - "80:80"
+      - "443:433"
+    links:
+      - php-fpm
+
+  php-fpm:
+    build:
+      context: .
+      dockerfile: config/php/Dockerfile
+    volumes:
+      - ./app:/var/www/html
+    ports:
+      - "9000:9000"
+    links:
+      - mysql
+      - redis
+      - elasticsearch
+      - memcached
+
+  mysql:
+    image: mysql
+    volumes:
+      - ./config/mysql/my.cnf:/etc/mysql/my.cnf
+      - ./data/mysql:/var/lib/mysql
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+
+  redis:
+    image: redis
+    volumes:
+      - ./data/redis:/data
+    ports:
+      - "6379:6379"
+
+  elasticsearch:
+    image: elasticsearch
+    volumes:
+      #- ./config/elasticsearch/config:/usr/share/elasticsearch/config
+      - ./data/elasticsearch:/usr/share/elasticsearch/data
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+
+  memcached:
+    image: memcached
+    ports:
+      - "11211:11211"
